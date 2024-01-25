@@ -5,13 +5,13 @@ class Lib:
     def __init__(self) -> None:
         self.lib = ctypes.CDLL("./lib.dylib")
 
-        self.lib.run.argtypes = []
-        self.lib.run.restype = None
+        self.lib.run1.argtypes = []
+        self.lib.run1.restype = None
 
-    def run(self):
+    def run1(self):
         print("PYTHON SIDE: Hello FFI")
-        self.lib.run()
+        self.lib.run1()
 
 
 lib = Lib()
-lib.run()
+lib.run1()
