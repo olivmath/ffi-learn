@@ -68,3 +68,44 @@ pub unsafe extern "C" fn run4(callback: Callback1, leaves_ptr: *mut *mut u8, len
         println!("RUST WITH HASH: {result:?}");
     }
 }
+
+/// # Safety
+///
+/// FFI to Python.
+#[no_mangle]
+pub unsafe extern "C" fn hash_within_rust(leaves_ptr: *mut *mut u8, len_leaves: usize) {
+    let leaves: Vec<Vec<u8>> = unsafe { slice::from_raw_parts(leaves_ptr, len_leaves) }
+        .iter()
+        .map(|leaf_ptr| unsafe { slice::from_raw_parts(*leaf_ptr, 32).to_vec() })
+        .collect();
+
+    for leaf in leaves {
+        let mut result: [u8; 32] = [0; 32];
+        hash_it(&leaf, &mut result);
+        println!("RUST SIDE: {result:?}");
+    }
+}
+
+/// # Safety
+///
+/// FFI to Python.
+#[no_mangle]
+pub unsafe extern "C" fn hash_without_rust(
+    callback: Callback1,
+    leaves_ptr: *mut *mut u8,
+    len_leaves: usize,
+) {
+    let leaves: Vec<Vec<u8>> = unsafe { slice::from_raw_parts(leaves_ptr, len_leaves) }
+        .iter()
+        .map(|leaf_ptr| unsafe { slice::from_raw_parts(*leaf_ptr, 32).to_vec() })
+        .collect();
+
+    for leaf in &leaves {
+        println!("RUST WITHOUT HASH: {leaf:?}");
+    }
+    for leaf in leaves {
+        let mut result: [u8; 32] = [0; 32];
+        callback(leaf.as_ptr(), result.as_mut_ptr());
+        println!("RUST WITH HASH: {result:?}");
+    }
+}
