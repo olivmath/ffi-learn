@@ -65,7 +65,7 @@ class Lib:
 
         self.lib.run3(leaves_pointers, len_leaves)
 
-    def run4(self, leaves: List[bytes], function: Callable[[bytes], bytes]):
+    def run4(self, leaves: List[bytes], function: Callable):
         for leaf in leaves:
             print(f"PYTHON WITHOUT HASH: {list(leaf)}")
         for leaf in leaves:
@@ -83,12 +83,6 @@ class Lib:
         self.lib.run4(callback_type(function), leaves_pointers, len_leaves)
 
 
-leaves_input = [sha256(data.encode()).digest() for data in ["a", "b", "c", "d"]]
-lib = Lib()
-lib.run1()
-lib.run2(leaves_input)
-lib.run3(leaves_input)
-
 
 def callback1(prt, buffer_ptr):
     data = bytes(prt[:32])
@@ -97,4 +91,9 @@ def callback1(prt, buffer_ptr):
     memmove(buffer_ptr, result, 32)
 
 
+leaves_input = [sha256(data.encode()).digest() for data in ["a", "b", "c", "d"]]
+lib = Lib()
+lib.run1()
+lib.run2(leaves_input)
+lib.run3(leaves_input)
 lib.run4(leaves_input, callback1)
