@@ -5,3 +5,8 @@ edition = "2021"
 
 
 [dependencies]
+tiny-keccak = { version = "2.0.2", features = ["keccak"] }
+
+
+[lib]
+crate-type = ["cdylib"]
