@@ -109,3 +109,22 @@ pub unsafe extern "C" fn hash_without_rust(
         println!("RUST WITH HASH: {result:?}");
     }
 }
+
+/// # Safety
+///
+/// FFI to Python.
+#[no_mangle]
+pub unsafe extern "C" fn run5(leaves_ptr: *const *const u8, len_leaves: usize) -> *const u8 {
+    let mut hasher = Keccak::v256();
+    let mut final_hash = [0u8; 32];
+
+    for i in 0..len_leaves {
+        let leaf = slice::from_raw_parts(*leaves_ptr.add(i), 32);
+        hasher.update(leaf);
+    }
+
+    hasher.finalize(&mut final_hash);
+
+    let boxed_hash = Box::new(final_hash);
+    Box::into_raw(boxed_hash) as *const u8
+}
