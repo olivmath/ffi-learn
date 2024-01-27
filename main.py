@@ -6,8 +6,7 @@ import ctypes
 
 class Lib:
     def __init__(self) -> None:
-        self.lib = ctypes.CDLL("./target/release/libffi_learn.dylib")
-        # self.lib = ctypes.CDLL("./lib.dylib")
+        self.lib = ctypes.CDLL("./libffi_learn.dylib")
 
         # RUN 1: Call function that just print something
         self.lib.run1.argtypes = []
