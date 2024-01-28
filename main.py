@@ -34,6 +34,20 @@ class Lib:
         ]
         self.lib.run4.restype = None
 
+        # RUN 5: Call function that send a list[bytes] and hash leaves and return it
+        self.lib.run5.argtypes = [
+            POINTER(POINTER(c_ubyte)),
+            c_size_t,
+        ]
+        self.lib.run5.restype = POINTER(c_ubyte)
+
+        self.lib.run5free_32.argtypes = [POINTER(c_ubyte)]
+        self.lib.run5free_32.restype = None
+
+        # RUN 6: Call function that send a list[bytes] and return a list[bytes]
+        self.lib.run6.argtypes = [POINTER(POINTER(c_ubyte)), c_size_t]
+        self.lib.run6.restype = POINTER(POINTER(c_ubyte))
+
     def run1(self):
         print("PYTHON SIDE: Hello FFI")
         self.lib.run1()
@@ -82,6 +96,40 @@ class Lib:
         callback_type = CFUNCTYPE(None, POINTER(c_ubyte), POINTER(c_ubyte))
         self.lib.run4(callback_type(function), leaves_pointers, len_leaves)
 
+    def run5(self, leaves: List[bytes]):
+        len_leaves = len(leaves)
+        leaves_pointers = (POINTER(c_ubyte) * len_leaves)()
+
+        for i, leaf in enumerate(leaves):
+            array_type = c_ubyte * len(leaf)
+            leaves_pointers[i] = array_type(*leaf)
+
+        hash_ptr = self.lib.run5(leaves_pointers, len_leaves)
+        hash_bytes = bytes(hash_ptr[:32])
+        print(list(hash_bytes))
+        self.lib.run5free_32(hash_ptr)
+        print(list(hash_bytes))
+
+        concatenated_bytes = b"".join(leaves)
+        r = hash_it_bytes(concatenated_bytes)
+        print(list(r))
+
+    def run6(self, leaves: List[bytes]):
+        for leaf in leaves:
+            print(f"PYTHON SIDE: {list(leaf)}")
+
+        len_leaves = len(leaves)
+        leaves_pointers = (POINTER(c_ubyte) * len_leaves)()
+
+        for i, leaf in enumerate(leaves):
+            array_type = c_ubyte * 32
+            leaves_pointers[i] = array_type(*leaf)
+
+        result_ptrs = self.lib.run6(leaves_pointers, len_leaves)
+
+        for i in range(len_leaves):
+            result = list(bytes(result_ptrs[i][:32]))
+            print(result)
 
 
 def callback1(prt, buffer_ptr):
@@ -97,3 +145,5 @@ lib.run1()
 lib.run2(leaves_input)
 lib.run3(leaves_input)
 lib.run4(leaves_input, callback1)
+lib.run5(leaves_input)
+lib.run6(leaves_input)

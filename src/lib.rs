@@ -128,3 +128,18 @@ pub unsafe extern "C" fn run5(leaves_ptr: *const *const u8, len_leaves: usize) -
     let boxed_hash = Box::new(final_hash);
     Box::into_raw(boxed_hash) as *const u8
 }
+
+/// # Safety
+///
+#[no_mangle]
+pub unsafe extern "C" fn run5free_32(ptr: *mut u8) {
+    unsafe {
+        let _ = Box::from_raw(slice::from_raw_parts_mut(ptr, 32));
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn run6(leaves_ptr: *const *const u8, len_leaves: usize) -> *const *const u8 {
+    let leaves = unsafe { slice::from_raw_parts(leaves_ptr, len_leaves) };
+    leaves.as_ptr()
+}
