@@ -48,6 +48,10 @@ class Lib:
         self.lib.run6.argtypes = [POINTER(POINTER(c_ubyte)), c_size_t]
         self.lib.run6.restype = POINTER(POINTER(c_ubyte))
 
+        # RUN 7: Call function that send a list[bytes], modified and return a list[bytes]
+        self.lib.run7.argtypes = [POINTER(POINTER(c_ubyte)), c_size_t]
+        self.lib.run7.restype = POINTER(POINTER(c_ubyte))
+
     def run1(self):
         print("PYTHON SIDE: Hello FFI")
         self.lib.run1()
@@ -115,9 +119,6 @@ class Lib:
         print(list(r))
 
     def run6(self, leaves: List[bytes]):
-        for leaf in leaves:
-            print(f"PYTHON SIDE: {list(leaf)}")
-
         len_leaves = len(leaves)
         leaves_pointers = (POINTER(c_ubyte) * len_leaves)()
 
@@ -131,6 +132,22 @@ class Lib:
             result = list(bytes(result_ptrs[i][:32]))
             print(result)
 
+    def run7(self, leaves: List[bytes]):
+        len_leaves = len(leaves)
+        leaves_pointers = (POINTER(c_ubyte) * len_leaves)()
+
+        for i, leaf in enumerate(leaves):
+            array_type = c_ubyte * 32
+            leaves_pointers[i] = array_type(*leaf)
+
+        result_ptrs = self.lib.run7(leaves_pointers, len_leaves)
+
+        for i in range(len_leaves):
+            result = list(bytes(result_ptrs[i][:33]))
+            flag = result[32]
+            result = result[:32]
+            print(f"flag: {flag}, result: {result}")
+
 
 def callback1(prt, buffer_ptr):
     data = bytes(prt[:32])
@@ -141,9 +158,10 @@ def callback1(prt, buffer_ptr):
 
 leaves_input = [sha256(data.encode()).digest() for data in ["a", "b", "c", "d"]]
 lib = Lib()
-lib.run1()
-lib.run2(leaves_input)
-lib.run3(leaves_input)
-lib.run4(leaves_input, callback1)
-lib.run5(leaves_input)
-lib.run6(leaves_input)
+# lib.run1()
+# lib.run2(leaves_input)
+# lib.run3(leaves_input)
+# lib.run4(leaves_input, callback1)
+# lib.run5(leaves_input)
+# lib.run6(leaves_input)
+lib.run7(leaves_input)
