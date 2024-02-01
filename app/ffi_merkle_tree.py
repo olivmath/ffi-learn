@@ -25,5 +25,6 @@ class FFIMerkleTreeRoot:
         hash_ptr = self.lib.make_merkle_root(leaves_pointers, len_leaves)
         hash_bytes = bytes(hash_ptr[:32])
         print(list(hash_bytes))
+
         self.lib.free_merkle_root(hash_ptr)
-        print(list(hash_bytes))
+        print(list(bytes(hash_ptr[:32])))

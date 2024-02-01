@@ -49,7 +49,7 @@ pub unsafe extern "C" fn make_merkle_root(
 
     let root = leaves.first().unwrap().to_vec();
     print!("ROOT: {root:?}");
-    let boxed_root = Box::new(root);
+    let boxed_root = root.into_boxed_slice();
     Box::into_raw(boxed_root) as *mut u8
 }
 
