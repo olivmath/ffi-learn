@@ -23,7 +23,7 @@ pub unsafe extern "C" fn make_array() -> *mut u8 {
 /// This function is safe to call from FFI contexts.
 #[no_mangle]
 pub unsafe extern "C" fn free_32(ptr: *mut u8) {
-    let array = unsafe { Box::from_raw(slice::from_raw_parts_mut(ptr, 32)) };
-
-    drop(array);
+    unsafe {
+        let _ = Box::from_raw(slice::from_raw_parts_mut(ptr, 32));
+    }
 }
